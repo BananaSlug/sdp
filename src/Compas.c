@@ -114,9 +114,10 @@ void initMasterSM();
 void runMasterSM();
 
 void updateAccelerometerLEDs();
-void updateHeading();
+void compas_updateHeading();
+#ifdef USE_BAROMETER
 float calculateAltitudeDifference();
-
+#endif
 BOOL readLockButton();
 BOOL readZeroButton();
 BOOL isLockPressed();
@@ -234,18 +235,20 @@ void runMasterSM() {
 
         if(lockPressed) {
             printf("Lock was pressed.\n");
-            #ifdef USE_NAVIGATION
+
             #ifdef USE_ENCODERS
             Encoder_enableZeroAngle();
             Encoder_runSM();
 
             #ifdef USE_BAROMETER
-            float height = calculateHeightDifference();
+            float height = calculateAltitudeDifference();
             #endif
 
             LocalCoordinate ned;
-            if (Navigation_getProjectedCoordinate(&ned, Encoder_getYaw(),
-                Encoder_getPitch(), height)) {
+            if(1){
+            //DAVID NEEDS TO ADD A FUNCTION HERE. that will replace the below function
+            //if (Navigation_getProjectedCoordinate(&ned, Encoder_getYaw(),
+                //Encoder_getPitch(), height)) {
                 printf("Desired coordinate -- N: %.6f, E: %.6f, D: %.2f (m)\n",
                     ned.n, ned.e, ned.d);
 
@@ -262,7 +265,6 @@ void runMasterSM() {
             #else
             printf("Navigation module is disabled.\n");
             #endif
-            #endif
 
         }
         else if (zeroPressed) {
@@ -274,7 +276,7 @@ void runMasterSM() {
             #ifdef  USE_MAGNETOMETER
             Magnetometer_runSM();
             heading = Magnetometer_getDegree();
-            updateHeading();
+            compas_updateHeading();
             #endif
             //printf("Zeroing...\n");
         }
@@ -292,10 +294,6 @@ void runMasterSM() {
     #ifdef USE_ACCELEROMETER
     Accelerometer_runSM();
     updateAccelerometerLEDs();
-    #endif
-
-    #ifdef USE_NAVIGATION
-    Navigation_runSM();
     #endif
 
     #ifdef USE_XBEE
@@ -316,7 +314,7 @@ void runMasterSM() {
  * @author Shehadeh Dajani
  * @date 2013.03.09  */
 #ifdef USE_MAGNETOMETER
-void updateHeading(){
+void compas_updateHeading(){
     if(heading < 40 || heading > 320)
         printf("Heading: %.1f (degrees)\n", heading);
     if(heading == 0)

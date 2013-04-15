@@ -446,7 +446,7 @@ int main(void) {
 #endif
 
 
-#define BAROMETER_TEST_2
+//#define BAROMETER_TEST_2
 #ifdef BAROMETER_TEST_2
 
 #define PRINT_DELAY     100 // (ms)
